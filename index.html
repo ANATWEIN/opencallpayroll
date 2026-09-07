@@ -35,10 +35,10 @@ button{font-family:inherit}
   background:linear-gradient(180deg,var(--bar3),var(--bar1));
   border-bottom:1px solid #143A6B;padding:6px 10px;display:flex;align-items:center;gap:6px;
 }
-.logo{color:#fff;font-weight:700;font-size:15px;letter-spacing:.4px;margin-inline-end:10px}
+.logo{color:#fff;font-weight:700;font-size:15px;letter-spacing:.4px;margin-inline-start:auto;text-align:left;line-height:1.05}
 .logo em{font-style:normal;color:#F0A860}
 .logo small{display:block;font-size:8px;opacity:.75;font-weight:400;letter-spacing:0}
-.icons{display:flex;gap:3px;margin-inline-start:auto;align-items:center}
+.icons{display:flex;gap:3px;align-items:center}
 .icons button{
   width:26px;height:24px;border:0;background:transparent;color:#F3A24D;font-size:14px;
   cursor:pointer;border-radius:3px;
@@ -52,12 +52,14 @@ button{font-family:inherit}
 
 /* ---- SY menu ---- */
 .symenu{
-  display:none;position:absolute;top:74px;right:14px;z-index:30;
+  display:none;position:absolute;top:70px;right:8px;z-index:30;
   background:#fff;border:1px solid #8496AC;box-shadow:0 6px 20px rgba(15,30,55,.32);
 }
 .symenu.on{display:flex}
-.symenu .col1{width:250px;border-inline-end:1px solid #C6D1DF;padding:2px 0}
-.symenu .col2{width:250px;padding:2px 0}
+.symenu .col1{width:250px;padding:2px 0;order:2}
+.symenu .col2{order:1}
+.symenu .col2{width:250px;padding:2px 0;display:none;border-inline-end:1px solid #C6D1DF}
+.symenu.help .col2{display:block}
 .symenu button{
   display:flex;align-items:center;gap:9px;width:100%;background:transparent;border:0;
   padding:7px 12px;font-size:12.5px;color:#22364C;cursor:pointer;text-align:right;
@@ -82,13 +84,13 @@ button{font-family:inherit}
 .ribbon{
   background:linear-gradient(180deg,var(--rib1),var(--rib2));
   border-bottom:1px solid #B4C2D2;padding:5px 8px 0;display:flex;gap:0;
-  justify-content:flex-start;flex-wrap:wrap;
+  justify-content:flex-start;flex-wrap:wrap;flex-direction:row-reverse;
 }
 .grp{
-  border-inline-start:1px solid #C6D1DF;padding:0 8px 0;display:flex;flex-direction:column;
+  border-inline-end:1px solid #C6D1DF;padding:0 8px 0;display:flex;flex-direction:column;
   align-items:center;min-height:74px;
 }
-.grp:last-child{border-inline-start:0}
+.grp:last-child{border-inline-end:0}
 .grp .items{display:flex;gap:5px;flex:1;align-items:flex-start;padding-bottom:3px}
 .grp .lbl{font-size:10.5px;color:#54687E;padding:2px 0 3px;text-align:center;width:100%;
   background:linear-gradient(180deg,rgba(0,0,0,0),rgba(126,146,168,.16))}
@@ -247,7 +249,6 @@ tr.unread b{font-weight:700}
     </div>
 
     <div class="cmdbar">
-      <span class="logo">SY<em>HARMONY</em><small>powered by</small></span>
       <div class="icons">
         <button class="round" onclick="toggleSy(event)">SY</button>
         <button title="הבא">▶</button><button title="הקודם">◀</button>
@@ -264,6 +265,7 @@ tr.unread b{font-weight:700}
         <button title="תיקייה">▧</button><button title="התראות">△</button>
         <button title="התראות">◭</button>
       </div>
+      <span class="logo">SY<em>HARMONY</em><small>powered by</small></span>
     </div>
 
     <div class="symenu" id="symenu">
@@ -283,6 +285,7 @@ tr.unread b{font-weight:700}
       <div class="col2" id="syhelp">
         <button onclick="closeSy();toast('תמיכה מרחוק — קיים היום')">תמיכה מרחוק</button>
         <button class="acc" onclick="closeSy();openNew()">פתיחת קריאת שרות</button>
+        <button onclick="closeSy();tab='service';screen=canSeeOrg?'all':'mine';render()">הקריאות שלי</button>
         <button onclick="closeSy();toast('החלפת רשיון')">החלפת רשיון</button>
         <button onclick="closeSy();toast('אודות')">אודות</button>
       </div>
@@ -391,8 +394,7 @@ function paintTabs(){
     b.className = on ? "on" : "";
     b.textContent = t;
     b.onclick = ()=>{
-      if(t==="שרות"){ tab="service"; screen = canSeeOrg ? "all" : "mine"; render(); }
-      else if(t==="בית"){ tab="home"; render(); }
+      if(t==="בית"){ tab="home"; render(); }
       else toast(t + " — מחוץ להיקף הפרוטוטייפ");
     };
     $('tabs').appendChild(b);
@@ -405,9 +407,6 @@ function paintRibbon(){
 
   $('ribbon').innerHTML = tab === "home" ? `
     <div class="grp"><div class="items">
-      <button class="rb big acc" onclick="openNew()"><i>☏</i>פתיחת<br>קריאה</button>
-      <button class="rb big" onclick="tab='service';screen='${canSeeOrg?'all':'mine'}';render()">
-        <i>▤</i>הקריאות<br>שלי (${canSeeOrg?open:mineOpen})</button>
       <button class="rb" onclick="toast('מערכת לישכת שרות — קיים')"><i>▧</i>מערכת לישכת שרות</button>
     </div><div class="lbl">לישכה</div></div>
 
@@ -436,6 +435,17 @@ function paintRibbon(){
 
     <div class="grp"><div class="items">
       <div class="stack">
+        <button class="rb" onclick="toast('הבא')"><i>▶</i>הבא</button>
+        <button class="rb" onclick="toast('אחרון')"><i>⏭</i>אחרון</button>
+      </div>
+      <div class="stack">
+        <button class="rb" onclick="toast('קודם')"><i>◀</i>קודם</button>
+        <button class="rb" onclick="toast('ראשון')"><i>⏮</i>ראשון</button>
+      </div>
+    </div><div class="lbl">דפדוף</div></div>
+
+    <div class="grp"><div class="items">
+      <div class="stack">
         <button class="rb" onclick="toast('ריענון')"><i>↻</i>ריענון</button>
         <button class="rb" onclick="toast('מחיקה')"><i>✕</i>מחיקה</button>
         <button class="rb" onclick="toast('הדבק')"><i>▣</i>הדבק</button>
@@ -451,6 +461,16 @@ function paintRibbon(){
       <button class="rb" onclick="toast('רשימת עובדים')"><i>⚈</i>רשימת עובדים</button>
       <button class="rb" onclick="toast('חיפוש עובד')"><i>⌕</i>חיפוש עובד</button>
     </div></div><div class="lbl">כללי</div></div>
+
+    <div class="grp"><div class="items" style="align-items:center;padding-top:6px">
+      <span style="display:inline-block;border:1px solid var(--line);background:#fff;
+        padding:4px 16px;color:var(--green-txt);font-weight:700;font-size:13px">04/2026</span>
+      <div class="stack" style="gap:1px">
+        <button class="rb" style="padding:1px 4px"><i>＋</i></button>
+        <button class="rb" style="padding:1px 4px"><i>▣</i></button>
+        <button class="rb" style="padding:1px 4px"><i>－</i></button>
+      </div>
+    </div><div class="lbl">חודש שכר</div></div>
   ` : `
     <div class="grp"><div class="items">
       <button class="rb big acc" onclick="openNew()"><i>☏</i>פתיחת<br>קריאה</button>
@@ -482,10 +502,10 @@ function paintRibbon(){
 function toggleSy(ev){
   ev.stopPropagation();
   $('symenu').classList.toggle('on');
-  $('syhelp').style.visibility = 'hidden';
+  $('symenu').classList.remove('help');
 }
-function syHelp(){ $('syhelp').style.visibility = 'visible'; }
-function closeSy(){ $('symenu').classList.remove('on'); }
+function syHelp(){ $('symenu').classList.add('help'); }
+function closeSy(){ $('symenu').classList.remove('on','help'); }
 document.addEventListener('click', e=>{
   if(!e.target.closest('.symenu') && !e.target.closest('.round')) closeSy();
 });
@@ -532,7 +552,7 @@ function homeScreen(){
     <div class="panel-h"><b>חודש שכר 04/2026 — רשימת עובדים</b>
       <div class="sp"><button class="btn">חיפוש עובד</button><button class="btn or">חישוב שכר</button></div></div>
     <div class="empty">מסך הבית הקיים של מערכת השכר.<br>
-      הפרוטוטייפ מדגים את רכיב קריאות השירות — ראו קבוצת "לישכה" בריבון, וטאב "שרות".</div>
+      לפתיחת קריאת שירות: לחצו על הלוגו <b>SY</b> בסרגל העליון ← עזרה ← פתיחת קריאת שרות.</div>
   </div>`;
 }
 
@@ -542,7 +562,7 @@ function callsScreen(){
   const ch = chips();
   return `<div class="panel">
     <div class="panel-h"><b>קריאות שירות — ${screen==='mine'?'הקריאות שלי':screen==='all'?'קריאות הארגון':'תמונת מצב'}</b>
-      <div class="sp"><button class="btn or" onclick="openNew()">+ קריאה חדשה</button></div></div>
+      <div class="sp"><button class="btn" onclick="tab='home';render()">חזרה לדף הבית</button></div></div>
     ${screen==='dash'?'':`
     <div class="filters">
       <input class="q" id="q" placeholder="חיפוש לפי מספר קריאה, נושא או מודול"
@@ -660,7 +680,7 @@ function exportXls(){
 }
 
 function openNew(){
-  draft = {site: lastSite||"", subj:"", desc:"", file:null};
+  draft = {site:"", subj:"", desc:"", file:null};
   paintNew(); showModal();
 }
 function paintNew(){
@@ -731,7 +751,6 @@ function submitNew(){
   const id = "CAS"+(seq++);
   const urg = SUBJ_URG[draft.subj]||2;
   const sla = urg===1?8:urg===2?24:48;
-  lastSite = draft.site;
   calls.unshift({id, subj:draft.subj, urg, st:"open", opened:"07/09/2026 14:05",
     by:ME, owner:null, site:draft.site, mod:SUBJ_MOD[draft.subj]||"לא סווג", sla, left:sla,
     msgs:[{w:ME,t:draft.desc}]});
@@ -781,15 +800,15 @@ function paintCall(){
         ${c.msgs.map(m=>`<div class="msg ${m.w===ME?'me':''}">
           <span class="av">${m.w.slice(0,2)}</span>
           <span class="bd"><span class="who">${m.w}</span><span class="tx">${m.t}</span></span></div>`).join('')}
-        ${c.st==='done'?'':`<div class="reply">
+        ${(mine && c.st!=='done')?`<div class="reply">
           <input id="rp" placeholder="הוספת הודעה לקריאה">
-          <button class="btn or" onclick="addMsg()">שליחה</button></div>`}
+          <button class="btn or" onclick="addMsg()">שליחה</button></div>`:''}
       </div></div>
     <div class="dlg-f">
-      ${(mine && c.st!=='done')?`<button class="btn or" onclick="setSt('${c.id}','done')">סגירת הקריאה</button>`:''}
+      ${((mine||orgView) && c.st!=='done')?`<button class="btn or" onclick="setSt('${c.id}','done')">סגירת הקריאה</button>`:''}
       <button class="btn" onclick="toast('ייצוא הקריאה ל-PDF')">ייצוא ל-PDF</button>
       <button class="btn" onclick="closeAll()">סגירה</button>
-      ${(orgView && !mine)?`<span style="color:var(--muted);font-size:11.5px;margin-inline-start:auto">קריאה של ${c.by} · ניתן לעקוב ולהוסיף הודעה</span>`:''}
+      ${(orgView && !mine)?`<span style="color:var(--muted);font-size:11.5px;margin-inline-start:auto">קריאה של ${c.by} · צפייה וסגירה בלבד</span>`:''}
     </div>`;
 }
 function addMsg(){
