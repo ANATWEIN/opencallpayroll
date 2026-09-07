@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>קריאות שירות במערכת השכר — הצעת UX</title>
+<style>
+:root{
+  --bar1:#1F4E8C; --bar2:#2E6BB0; --bar3:#4A8BCC;
+  --rib1:#EFF3F8; --rib2:#DCE5EF; --grp:#7E92A8;
+  --or:#E8842A; --or-dk:#C96A16; --or-lt:#FDF1E4;
+  --ink:#1E2A38; --muted:#6E7A8A; --line:#B9C6D6; --line2:#D8E0EA;
+  --green-txt:#1E7A38; --panel:#fff;
+  --red:#B32D2D; --red-lt:#FBEDED; --amber:#8A6A0B; --amber-lt:#FCF5E2;
+  --ok:#2E7D57; --ok-lt:#E9F5EE; --info-lt:#E4EDF8;
+  --font:"Segoe UI","Assistant","Rubik",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:#8FA4BC;color:var(--ink);font-size:13px}
+button{font-family:inherit}
+.wrap{max-width:1400px;margin:0 auto;padding:12px 10px 44px}
+.note{text-align:center;color:#20364F;font-size:13px;margin:0 0 9px}
+.app{background:#F4F6F9;border:1px solid #6E8299;box-shadow:0 8px 26px rgba(15,30,55,.3);display:flex;flex-direction:column;min-height:660px}
+
+/* ---- title bar ---- */
+.titlebar{
+  background:linear-gradient(#F2F5F9,#E4EAF2);border-bottom:1px solid #C3CEDC;
+  height:26px;display:flex;align-items:center;padding:0 8px;font-size:12px;color:#33455C;gap:8px;
+}
+.titlebar .sy{background:var(--bar1);color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:2px}
+.titlebar .sp{margin-inline-start:auto;display:flex;gap:14px;color:#5A6B80}
+
+/* ---- blue command bar ---- */
+.cmdbar{
+  background:linear-gradient(180deg,var(--bar3),var(--bar1));
+  border-bottom:1px solid #143A6B;padding:6px 10px;display:flex;align-items:center;gap:6px;
+}
+.logo{color:#fff;font-weight:700;font-size:15px;letter-spacing:.4px;margin-inline-end:10px}
+.logo em{font-style:normal;color:#F0A860}
+.logo small{display:block;font-size:8px;opacity:.75;font-weight:400;letter-spacing:0}
+.icons{display:flex;gap:3px;margin-inline-start:auto;align-items:center}
+.icons button{
+  width:26px;height:24px;border:0;background:transparent;color:#F3A24D;font-size:14px;
+  cursor:pointer;border-radius:3px;
+}
+.icons button:hover{background:rgba(255,255,255,.16)}
+.period{
+  background:#fff;border:1px solid #9DB3CC;border-radius:2px;padding:3px 12px;
+  color:var(--green-txt);font-weight:700;font-size:13px;min-width:86px;text-align:center;
+}
+.round{width:24px;height:24px;border-radius:50%;background:#fff;color:var(--bar1);font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;border:0}
+
+/* ---- SY menu ---- */
+.symenu{
+  display:none;position:absolute;top:74px;right:14px;z-index:30;
+  background:#fff;border:1px solid #8496AC;box-shadow:0 6px 20px rgba(15,30,55,.32);
+}
+.symenu.on{display:flex}
+.symenu .col1{width:250px;border-inline-end:1px solid #C6D1DF;padding:2px 0}
+.symenu .col2{width:250px;padding:2px 0}
+.symenu button{
+  display:flex;align-items:center;gap:9px;width:100%;background:transparent;border:0;
+  padding:7px 12px;font-size:12.5px;color:#22364C;cursor:pointer;text-align:right;
+}
+.symenu button:hover{background:#FFF6D6}
+.symenu button.hl{background:#F5E96B}
+.symenu button.acc{background:#F5E96B;font-weight:600}
+.symenu button i{font-style:normal;color:#C9A227;font-size:13px;width:14px}
+.symenu button span{margin-inline-start:auto;color:#6E7A8A;font-size:10px}
+
+/* ---- tabs ---- */
+.tabs{background:#E9EEF5;border-bottom:1px solid #BCC9D9;display:flex;justify-content:flex-start;padding:0 6px;gap:0}
+.tabs button{
+  background:transparent;border:0;border-bottom:2px solid transparent;padding:5px 13px;
+  font-size:12.5px;color:#2B4058;cursor:pointer;
+}
+.tabs button:hover{background:#DCE5EF}
+.tabs button.on{background:#F4F6F9;border:1px solid #BCC9D9;border-bottom-color:#F4F6F9;
+  border-radius:3px 3px 0 0;margin-bottom:-1px;font-weight:600}
+
+/* ---- ribbon ---- */
+.ribbon{
+  background:linear-gradient(180deg,var(--rib1),var(--rib2));
+  border-bottom:1px solid #B4C2D2;padding:5px 8px 0;display:flex;gap:0;
+  justify-content:flex-start;flex-wrap:wrap;
+}
+.grp{
+  border-inline-start:1px solid #C6D1DF;padding:0 8px 0;display:flex;flex-direction:column;
+  align-items:center;min-height:74px;
+}
+.grp:last-child{border-inline-start:0}
+.grp .items{display:flex;gap:5px;flex:1;align-items:flex-start;padding-bottom:3px}
+.grp .lbl{font-size:10.5px;color:#54687E;padding:2px 0 3px;text-align:center;width:100%;
+  background:linear-gradient(180deg,rgba(0,0,0,0),rgba(126,146,168,.16))}
+.rb{
+  background:transparent;border:1px solid transparent;border-radius:3px;padding:3px 6px;
+  font-size:11.5px;color:#22364C;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.rb:hover{background:#FDF0DE;border-color:#E8B87A}
+.rb i{font-style:normal;color:var(--or);font-size:12px}
+.rb.big{flex-direction:column;gap:2px;padding:4px 9px;font-size:11px;line-height:1.25}
+.rb.big i{font-size:19px}
+.rb.acc{background:#FDF1E4;border-color:#E9C79C;font-weight:600}
+.stack{display:flex;flex-direction:column;gap:2px}
+
+/* ---- body ---- */
+.body{flex:1;padding:12px;background:#F4F6F9;overflow:auto}
+.panel{background:#fff;border:1px solid var(--line);box-shadow:0 1px 2px rgba(20,40,70,.06)}
+.panel-h{background:linear-gradient(180deg,#F7F9FC,#E9EFF6);border-bottom:1px solid var(--line);
+  padding:7px 11px;display:flex;align-items:center;gap:9px}
+.panel-h b{font-size:13px;color:#1B3A63}
+.panel-h .sp{margin-inline-start:auto;display:flex;gap:6px}
+.btn{background:linear-gradient(180deg,#fff,#EEF2F7);border:1px solid var(--line);border-radius:3px;
+  padding:5px 11px;font-size:12px;color:#22364C;cursor:pointer}
+.btn:hover{background:#FDF1E4;border-color:#E0B583}
+.btn.or{background:linear-gradient(180deg,#EE9445,var(--or));border-color:var(--or-dk);color:#fff;font-weight:600}
+.btn.or:hover{background:var(--or-dk)}
+.btn.or:disabled{background:#C3CBD6;border-color:#AAB4C1;cursor:not-allowed}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{background:#fff;border:0;padding:5px 12px;font-size:12px;color:#22364C;cursor:pointer}
+.seg button.on{background:var(--bar2);color:#fff;font-weight:600}
+
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 11px;border-bottom:1px solid var(--line2);background:#FAFCFE}
+.filters input.q{flex:1;min-width:170px;border:1px solid var(--line);border-radius:2px;padding:5px 9px;font-family:inherit;font-size:12px}
+select{border:1px solid var(--line);border-radius:2px;padding:5px 7px;font-family:inherit;font-size:12px;background:#fff;color:#22364C}
+.chips{display:flex;flex-wrap:wrap;gap:5px;padding:7px 11px;border-bottom:1px solid var(--line2);align-items:center;min-height:36px}
+.chip{background:var(--or-lt);color:var(--or-dk);border:1px solid #E9C79C;border-radius:2px;padding:2px 8px;font-size:11px;cursor:pointer}
+.chips .saved{display:flex;gap:5px;align-items:center;font-size:11.5px;color:var(--muted)}
+.chips .saved button{background:#EDF1F6;border:1px solid var(--line2);border-radius:2px;padding:2px 8px;font-size:11px;color:#22364C;cursor:pointer}
+.chips .saved button.on{background:var(--bar2);color:#fff;border-color:var(--bar1)}
+.chips .num{margin-inline-start:auto;color:var(--muted);font-size:11.5px}
+
+table{width:100%;border-collapse:collapse}
+th{background:linear-gradient(180deg,#F3F7FB,#E3EBF4);text-align:right;font-size:11.5px;color:#3A4F68;
+  font-weight:600;padding:6px 9px;border-bottom:1px solid var(--line);border-inline-start:1px solid var(--line2);white-space:nowrap}
+td{padding:6px 9px;border-bottom:1px solid #EDF1F6;border-inline-start:1px solid #F2F5F9;font-size:12px;vertical-align:middle}
+tr:nth-child(even) td{background:#FAFCFE}
+tr.row:hover td{background:#EAF2FB;cursor:pointer}
+tr.unread td:first-child{box-shadow:inset 3px 0 0 var(--or)}
+tr.unread b{font-weight:700}
+.id{color:var(--bar1);font-weight:600;direction:ltr;display:inline-block}
+.tag{display:inline-block;border-radius:2px;padding:1px 7px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid}
+.tag.open{background:var(--or-lt);color:var(--or-dk);border-color:#E9C79C}
+.tag.work{background:var(--info-lt);color:var(--bar1);border-color:#B9CDE6}
+.tag.wait{background:var(--amber-lt);color:var(--amber);border-color:#E6D5A4}
+.tag.done{background:var(--ok-lt);color:var(--ok);border-color:#BFE0CD}
+.u1{color:var(--red);font-weight:600}
+.u3{color:var(--muted)}
+.over{color:var(--red);font-weight:600}
+.empty{padding:36px 16px;text-align:center;color:var(--muted);line-height:1.8;font-size:12.5px}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.donut{display:flex;align-items:center;gap:14px;padding:12px}
+.ring{width:108px;height:108px;border-radius:50%;flex:0 0 auto;border:1px solid #C9D6E4}
+.lg{font-size:12px;line-height:1.9}
+.lg i{display:inline-block;width:14px;height:3px;margin-inline-end:6px;vertical-align:middle}
+.bars{padding:10px 12px}
+.bar{display:grid;grid-template-columns:140px 1fr 30px;gap:8px;align-items:center;margin-bottom:7px;font-size:12px}
+.bar em{font-style:normal;color:#3A4F68}
+.bar .tr{display:block;background:#E7EDF4;border:1px solid #D4DEEA;height:9px;overflow:hidden}
+.bar .fi{display:block;height:100%;background:var(--bar2)}
+.bar .fi.o{background:var(--or)}
+.bar b{text-align:left;direction:ltr}
+
+/* ---- status bar ---- */
+.statusbar{
+  background:linear-gradient(180deg,#E8EDF4,#D6DFEA);border-top:1px solid #B4C2D2;
+  padding:3px 8px;display:flex;gap:0;font-size:11px;color:#3A4F68;
+}
+.statusbar span{border-inline-start:1px solid #BCC9D9;padding:2px 10px}
+.statusbar span:first-child{border-inline-start:0}
+.statusbar .sp{margin-inline-start:auto;border:0}
+
+/* ---- dialog ---- */
+.scrim{position:fixed;inset:0;background:rgba(20,35,60,.42);display:none;z-index:40}
+.scrim.on{display:block}
+.modal{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-start;z-index:41;padding:26px 14px;overflow:auto}
+.modal.on{display:flex}
+.dlg{background:#F4F6F9;border:1px solid #6E8299;width:100%;max-width:600px;box-shadow:0 16px 44px rgba(15,30,55,.45)}
+.dlg.wide{max-width:760px}
+.dlg-h{background:linear-gradient(180deg,var(--bar3),var(--bar1));color:#fff;padding:6px 11px;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600}
+.dlg-h .x{margin-inline-start:auto;background:transparent;border:0;color:#fff;font-size:15px;cursor:pointer;opacity:.9}
+.dlg-b{padding:14px 16px;background:#F4F6F9}
+.dlg-f{padding:9px 16px;background:linear-gradient(180deg,#EDF1F6,#E1E8F0);border-top:1px solid var(--line);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+.auto{background:#fff;border:1px solid var(--line);padding:9px 11px;margin-bottom:13px}
+.auto .hd{display:flex;align-items:center;margin-bottom:6px}
+.auto .hd b{font-size:11.5px;color:var(--bar1)}
+.auto .hd button{margin-inline-start:auto;background:transparent;border:0;color:var(--bar2);font-size:11.5px;cursor:pointer;text-decoration:underline}
+.auto dl{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:3px 11px;margin:0;font-size:11.5px}
+.auto dt{color:var(--muted)}
+.auto dd{margin:0}
+
+.fld{margin-bottom:11px}
+.fld label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#22364C}
+.fld label .req{color:var(--red)}
+.fld input[type=text],.fld textarea,.fld select{width:100%;border:1px solid var(--line);border-radius:2px;padding:6px 9px;font-family:inherit;font-size:12.5px;background:#fff}
+.fld textarea{resize:vertical;min-height:74px}
+.fld .hint{font-size:11px;color:var(--muted);margin-top:3px;display:block}
+.shot{background:#fff;border:1px solid var(--line);padding:8px;display:flex;gap:10px;align-items:center}
+.shot .th{width:104px;height:62px;border:1px solid var(--line2);flex:0 0 auto;position:relative;overflow:hidden;
+  background:repeating-linear-gradient(180deg,#EEF3F9 0 5px,#fff 5px 10px)}
+.shot .th::before{content:"";position:absolute;top:0;right:0;left:0;height:9px;background:var(--bar2)}
+.shot .t{flex:1;font-size:12px}
+.shot .t span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.file{background:#fff;border:1px dashed var(--line);padding:11px;text-align:center;color:var(--muted);cursor:pointer;font-size:12px}
+.file:hover{border-color:var(--or);color:var(--or-dk)}
+
+.confirm{text-align:center;padding:18px 14px}
+.confirm .mk{width:46px;height:46px;border-radius:50%;background:var(--ok-lt);border:1px solid #BFE0CD;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px}
+.confirm h3{margin:0 0 4px;font-size:16px;color:#1B3A63}
+.confirm p{margin:0 0 11px;color:var(--muted);font-size:12.5px}
+.recap{background:#fff;border:1px solid var(--line);text-align:right}
+.recap .r{display:flex;justify-content:space-between;padding:7px 11px;border-top:1px solid var(--line2);font-size:12px}
+.recap .r:first-child{border-top:0}
+.recap .r span{color:var(--muted)}
+
+.det dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0 0 12px;font-size:12px}
+.det dt{color:var(--muted)}
+.det dd{margin:0}
+.thread{border-top:1px solid var(--line2);padding-top:11px}
+.msg{display:flex;gap:8px;margin-bottom:9px}
+.msg .av{width:26px;height:26px;border-radius:2px;background:#DDE5EF;color:#33455C;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;flex:0 0 auto}
+.msg.me .av{background:var(--bar2);color:#fff}
+.msg .bd{flex:1}
+.msg .who{font-size:11px;color:var(--muted);margin-bottom:2px}
+.msg .tx{background:#fff;border:1px solid var(--line2);padding:7px 10px;font-size:12px;line-height:1.5}
+.msg.me .tx{background:#F6FAFF;border-color:#C9DCF0}
+.reply{display:flex;gap:6px;margin-top:8px}
+.reply input{flex:1;border:1px solid var(--line);border-radius:2px;padding:6px 9px;font-family:inherit;font-size:12px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(9px);
+  background:#22364C;color:#fff;padding:8px 15px;font-size:12.5px;opacity:0;transition:all .2s;z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.restart{display:block;margin:11px auto 0;background:transparent;border:0;color:#1E3350;font-size:12px;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="note">קריאות שירות במערכת השכר — פרוטוטייפ</p>
+
+  <div class="app" style="position:relative">
+    <div class="titlebar">
+      <span class="sy">SY</span>
+      <span>מערכת הרמוני שכר למפעל-507 המכללה האקדמית ספיר [MLL]</span>
+      <span class="sp"><span>—</span><span>▢</span><span>✕</span></span>
+    </div>
+
+    <div class="cmdbar">
+      <span class="logo">SY<em>HARMONY</em><small>powered by</small></span>
+      <div class="icons">
+        <button class="round" onclick="toggleSy(event)">SY</button>
+        <button title="הבא">▶</button><button title="הקודם">◀</button>
+        <button title="עובדים">⚇</button><button title="עובדים">⚈</button>
+        <button title="שמירה">▤</button><button title="רענון">↻</button>
+        <button title="היסטוריה">◷</button><button title="רשימה">☰</button>
+        <button title="הוספה">＋</button>
+        <span class="period">04/2026</span>
+        <button title="הסרה">－</button><button title="חיפוש">⌕</button>
+        <button title="דוחות">▥</button><button title="עובד">⚇</button>
+        <button title="עובדים">⚈</button><button title="דואר">✉</button>
+        <button title="נעילה">⚿</button><button title="חיפוש בדוח">▦</button>
+        <button title="הגדרות">⚙</button><button title="הדפסה">⎙</button>
+        <button title="תיקייה">▧</button><button title="התראות">△</button>
+        <button title="התראות">◭</button>
+      </div>
+    </div>
+
+    <div class="symenu" id="symenu">
+      <div class="col1">
+        <button onclick="closeSy();toast('ספריות קבצים')"><i>⚿</i>ספריות קבצים<span>◂</span></button>
+        <button onclick="closeSy();toast('נושאי עיצוב')"><i>⚿</i>נושאי עיצוב<span>◂</span></button>
+        <button onclick="closeSy();toast('התחברות')"><i>⚿</i>התחברות</button>
+        <button onclick="closeSy();toast('שפה')"><i>⚿</i>שפה<span>◂</span></button>
+        <button onclick="closeSy();toast('הדפסת המסך')"><i>⚿</i>הדפסת המסך</button>
+        <button onclick="closeSy();toast('[Enter] for [Tab]')"><i>⚿</i>[Enter] for [Tab]</button>
+        <button onclick="closeSy();toast('הגדרות מסך')"><i>⚿</i>הגדרות מסך</button>
+        <button onclick="closeSy();toast('הגדרות תחיליות')"><i>⚿</i>הגדרות תחיליות<span>◂</span></button>
+        <button onclick="closeSy();toast('הגדרות הדפסה')"><i>⚿</i>הגדרות הדפסה<span>◂</span></button>
+        <button class="hl" onmouseenter="syHelp(true)"><i>⚿</i>עזרה<span>◂</span></button>
+        <button onclick="closeSy();toast('סגור')"><i>⚿</i>סגור</button>
+      </div>
+      <div class="col2" id="syhelp">
+        <button onclick="closeSy();toast('תמיכה מרחוק — קיים היום')">תמיכה מרחוק</button>
+        <button class="acc" onclick="closeSy();openNew()">פתיחת קריאת שרות</button>
+        <button onclick="closeSy();toast('החלפת רשיון')">החלפת רשיון</button>
+        <button onclick="closeSy();toast('אודות')">אודות</button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="ribbon" id="ribbon"></div>
+    <div class="body" id="body"></div>
+
+    <div class="statusbar">
+      <span>עובד נוכחי:</span>
+      <span>507 - sacar507ora</span>
+      <span>מערכת הרמוני שכר למפעל-507 [MLL]</span>
+      <span class="sp">Version: 1.0.4.1454 - harmash-ls</span>
+    </div>
+  </div>
+
+  <button class="restart" onclick="location.reload()">איפוס הדמו</button>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeAll()"></div>
+<div class="modal" id="modal"><div class="dlg" id="dlg"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ME = "sacar507ora";
+const ORG = "507 · המכללה האקדמית ספיר";
+const SITES = ["כלל־ארגוני","קמפוס ראשי","בניין הנדסה","מעונות","מרכז ספורט"];
+// רשימת הנושאים של מערכת השכר — נפרדת מזו של הנוכחות
+const SUBJECTS = [
+  "תלושי שכר – תקלה בהפקה",
+  "חישוב שכר – תוצאה שגויה",
+  "טופס 101 – תקלה בהזנה",
+  "ניכויים וזקיפות – חישוב שגוי",
+  "ממשק בנקים – קובץ לא נוצר",
+  "דיווח לרשויות – שגיאת שידור",
+  "הרשאות ומשתמשים",
+  "דו״חות שכר – תקלה בהפקה",
+  "אחר"
+];
+const SUBJ_MOD = {
+  "תלושי שכר – תקלה בהפקה":"תלושים",
+  "חישוב שכר – תוצאה שגויה":"חישוב",
+  "טופס 101 – תקלה בהזנה":"טפסים",
+  "ניכויים וזקיפות – חישוב שגוי":"חישוב",
+  "ממשק בנקים – קובץ לא נוצר":"ממשקים",
+  "דיווח לרשויות – שגיאת שידור":"ממשקים",
+  "הרשאות ומשתמשים":"הרשאות",
+  "דו״חות שכר – תקלה בהפקה":"דו״חות",
+  "אחר":"לא סווג"
+};
+const SUBJ_URG = {
+  "תלושי שכר – תקלה בהפקה":1,
+  "חישוב שכר – תוצאה שגויה":1,
+  "ממשק בנקים – קובץ לא נוצר":1,
+  "דיווח לרשויות – שגיאת שידור":1,
+  "טופס 101 – תקלה בהזנה":2,
+  "ניכויים וזקיפות – חישוב שגוי":2,
+  "דו״חות שכר – תקלה בהפקה":2,
+  "הרשאות ומשתמשים":3,
+  "אחר":2
+};
+const ST = {
+  open:{t:"פתוחה", c:"open"}, work:{t:"בטיפול", c:"work"},
+  wait:{t:"ממתינה לתגובתך", c:"wait"}, done:{t:"נסגרה", c:"done"}
+};
+const URG = {1:"גבוהה", 2:"בינונית", 3:"נמוכה"};
+
+let seq = 274120;
+let calls = [
+  {id:"CAS274088", subj:"ממשק בנקים – קובץ לא נוצר", urg:1, st:"work",
+   opened:"07/09/2026 08:12", by:ME, owner:"תום ברוש", site:"כלל־ארגוני", mod:"ממשקים",
+   sla:8, left:-2, unread:true,
+   msgs:[{w:ME,t:"הרצת ממשק הבנקים הסתיימה בלי קובץ פלט."},
+         {w:"תום ברוש",t:"בודקים את הגדרות הנתיב ומעדכנים היום."}]},
+  {id:"CAS274061", subj:"חישוב שכר – תוצאה שגויה", urg:1, st:"wait",
+   opened:"05/09/2026 10:40", by:ME, owner:"מינה טוביס", site:"קמפוס ראשי", mod:"חישוב",
+   sla:8, left:3,
+   msgs:[{w:ME,t:"תוספת ותק לא מחושבת לעובדי מנהלה."},
+         {w:"מינה טוביס",t:"אפשר לשלוח את מספר העובד לדוגמה?"}]},
+  {id:"CAS274030", subj:"טופס 101 – תקלה בהזנה", urg:2, st:"done",
+   opened:"02/09/2026 13:05", by:ME, owner:"תום ברוש", site:"מעונות", mod:"טפסים",
+   sla:24, left:0,
+   msgs:[{w:ME,t:"עובד לא מצליח לשמור את טופס 101."},
+         {w:"תום ברוש",t:"הוגדרה שנת מס שגויה. תוקן."}]},
+  {id:"CAS274002", subj:"הרשאות ומשתמשים", urg:3, st:"open",
+   opened:"31/08/2026 15:22", by:"רונית לוי", owner:null, site:"בניין הנדסה", mod:"הרשאות",
+   sla:48, left:9,
+   msgs:[{w:"רונית לוי",t:"משתמשת חדשה לא רואה את מסך התלושים."}]},
+  {id:"CAS273981", subj:"דו״חות שכר – תקלה בהפקה", urg:2, st:"work",
+   opened:"28/08/2026 09:47", by:"רונית לוי", owner:"מינה טוביס", site:"מרכז ספורט", mod:"דו״חות",
+   sla:24, left:-1,
+   msgs:[{w:"רונית לוי",t:"דוח ריכוז שכר נתקע בהפקה."}]}
+];
+
+let canSeeOrg = true, tab = "home", screen = "mine";
+let f = {q:"", st:"", urg:"", owner:"", sla:"", site:""};
+let savedView = null, cur = null, draft = {}, lastSite = "";
+const $ = id => document.getElementById(id);
+
+const TABS = ["בית","עובדים","ארגון","תנועות","חישוב","דו״חות","טבלאות","אפשריות","שרות","מחולל דוחות"];
+function paintTabs(){
+  $('tabs').innerHTML = "";
+  TABS.forEach(t=>{
+    const b = document.createElement('button');
+    const on = (t==="שרות" && tab==="service") || (t==="בית" && tab==="home");
+    b.className = on ? "on" : "";
+    b.textContent = t;
+    b.onclick = ()=>{
+      if(t==="שרות"){ tab="service"; screen = canSeeOrg ? "all" : "mine"; render(); }
+      else if(t==="בית"){ tab="home"; render(); }
+      else toast(t + " — מחוץ להיקף הפרוטוטייפ");
+    };
+    $('tabs').appendChild(b);
+  });
+}
+
+function paintRibbon(){
+  const open = calls.filter(c=>c.st!=="done").length;
+  const mineOpen = calls.filter(c=>c.by===ME && c.st!=="done").length;
+
+  $('ribbon').innerHTML = tab === "home" ? `
+    <div class="grp"><div class="items">
+      <button class="rb big acc" onclick="openNew()"><i>☏</i>פתיחת<br>קריאה</button>
+      <button class="rb big" onclick="tab='service';screen='${canSeeOrg?'all':'mine'}';render()">
+        <i>▤</i>הקריאות<br>שלי (${canSeeOrg?open:mineOpen})</button>
+      <button class="rb" onclick="toast('מערכת לישכת שרות — קיים')"><i>▧</i>מערכת לישכת שרות</button>
+    </div><div class="lbl">לישכה</div></div>
+
+    <div class="grp"><div class="items">
+      <button class="rb" onclick="toast('דיווח תנועות')"><i>▦</i>דיווח תנועות</button>
+    </div><div class="lbl">תנועות</div></div>
+
+    <div class="grp"><div class="items">
+      <button class="rb" onclick="toast('טופס 101')"><i>▤</i>טופס 101</button>
+    </div><div class="lbl">מה חדש</div></div>
+
+    <div class="grp"><div class="items">
+      <button class="rb big" onclick="toast('חישוב שכר')"><i>▩</i>חישוב<br>שכר</button>
+      <button class="rb" onclick="toast('צפיה בתלושים')"><i>▥</i>צפיה בתלושים</button>
+    </div><div class="lbl">חישוב</div></div>
+
+    <div class="grp"><div class="items"><div class="stack">
+      <button class="rb" onclick="toast('פרטי שכר')"><i>⚇</i>פרטי שכר</button>
+      <button class="rb" onclick="toast('פרטי כ״א')"><i>⚈</i>פרטי כ״א</button>
+    </div></div><div class="lbl">עובד</div></div>
+
+    <div class="grp"><div class="items"><div class="stack">
+      <button class="rb" onclick="toast('סדר עולה')"><i>↑</i>סדר עולה</button>
+      <button class="rb" onclick="toast('סדר יורד')"><i>↓</i>סדר יורד</button>
+    </div></div><div class="lbl">מיון</div></div>
+
+    <div class="grp"><div class="items">
+      <div class="stack">
+        <button class="rb" onclick="toast('ריענון')"><i>↻</i>ריענון</button>
+        <button class="rb" onclick="toast('מחיקה')"><i>✕</i>מחיקה</button>
+        <button class="rb" onclick="toast('הדבק')"><i>▣</i>הדבק</button>
+      </div>
+      <div class="stack">
+        <button class="rb" onclick="toast('הוסף')"><i>＋</i>הוסף</button>
+        <button class="rb" onclick="toast('העתק')"><i>⧉</i>העתק</button>
+        <button class="rb" onclick="toast('שמירה')"><i>▤</i>שמירה</button>
+      </div>
+    </div><div class="lbl">פעולות</div></div>
+
+    <div class="grp"><div class="items"><div class="stack">
+      <button class="rb" onclick="toast('רשימת עובדים')"><i>⚈</i>רשימת עובדים</button>
+      <button class="rb" onclick="toast('חיפוש עובד')"><i>⌕</i>חיפוש עובד</button>
+    </div></div><div class="lbl">כללי</div></div>
+  ` : `
+    <div class="grp"><div class="items">
+      <button class="rb big acc" onclick="openNew()"><i>☏</i>פתיחת<br>קריאה</button>
+    </div><div class="lbl">קריאה</div></div>
+
+    <div class="grp"><div class="items"><div class="stack">
+      <button class="rb ${screen==='mine'?'acc':''}" onclick="screen='mine';render()"><i>▤</i>הקריאות שלי</button>
+      ${canSeeOrg?`<button class="rb ${screen==='all'?'acc':''}" onclick="screen='all';render()"><i>▥</i>קריאות הארגון</button>`:''}
+    </div>
+    ${canSeeOrg?`<button class="rb big ${screen==='dash'?'acc':''}" onclick="screen='dash';render()"><i>◔</i>תמונת<br>מצב</button>`:''}
+    </div><div class="lbl">תצוגה</div></div>
+
+    <div class="grp"><div class="items">
+      <button class="rb" onclick="exportXls()"><i>▤</i>ייצוא לאקסל</button>
+      <button class="rb" onclick="toast('הדפסה')"><i>⎙</i>הדפסה</button>
+    </div><div class="lbl">פלט</div></div>
+
+    <div class="grp"><div class="items"><div class="stack">
+      <button class="rb" onclick="applySaved('over')"><i>△</i>חורגות מזמן תגובה</button>
+      <button class="rb" onclick="resetF()"><i>↻</i>ניקוי סינון</button>
+    </div></div><div class="lbl">סינון</div></div>
+
+    <div class="grp"><div class="items"><div class="stack">
+      <button class="rb" onclick="setPerm(true)"><i>${canSeeOrg?'●':'○'}</i>עם הרשאה לארגון</button>
+      <button class="rb" onclick="setPerm(false)"><i>${canSeeOrg?'○':'●'}</i>ללא הרשאה</button>
+    </div></div><div class="lbl">הדגמה</div></div>
+  `;
+}
+function toggleSy(ev){
+  ev.stopPropagation();
+  $('symenu').classList.toggle('on');
+  $('syhelp').style.visibility = 'hidden';
+}
+function syHelp(){ $('syhelp').style.visibility = 'visible'; }
+function closeSy(){ $('symenu').classList.remove('on'); }
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.symenu') && !e.target.closest('.round')) closeSy();
+});
+
+function setPerm(v){ canSeeOrg=v; screen = v?"all":"mine"; render(); }
+
+function scopeList(){
+  let list = calls.slice();
+  if(screen==="mine") list = list.filter(c=>c.by===ME);
+  if(f.q) list = list.filter(c => (c.id+c.subj+c.mod+(c.site||'')).includes(f.q.trim()));
+  if(f.site) list = list.filter(c=>c.site===f.site);
+  if(f.st) list = list.filter(c=>c.st===f.st);
+  if(f.urg) list = list.filter(c=>String(c.urg)===f.urg);
+  if(f.owner) list = list.filter(c=>c.owner===f.owner);
+  if(f.sla==="over") list = list.filter(c=>c.left<0 && c.st!=="done");
+  return list;
+}
+function chips(){
+  const o=[];
+  if(f.q) o.push(["q",`חיפוש: ${f.q}`]);
+  if(f.site) o.push(["site",f.site]);
+  if(f.st) o.push(["st",ST[f.st].t]);
+  if(f.urg) o.push(["urg",`דחיפות ${URG[f.urg]}`]);
+  if(f.owner) o.push(["owner",f.owner]);
+  if(f.sla) o.push(["sla","חורגות מזמן תגובה"]);
+  return o;
+}
+function clearF(k){ f[k]=""; savedView=null; render(); }
+function resetF(){ f={q:"",st:"",urg:"",owner:"",sla:"",site:""}; savedView=null; render(); }
+function applySaved(k){
+  if(savedView===k) resetF();
+  else if(k==='over'){ savedView=k; f={q:"",st:"",urg:"",owner:"",sla:"over",site:""}; tab='service'; render(); }
+  else { savedView=k; f={q:"",st:"open",urg:"1",owner:"",sla:"",site:""}; render(); }
+}
+function goFilter(o){ f={q:"",st:"",urg:"",owner:"",sla:"",site:"",...o}; savedView=null; screen='all'; render(); }
+
+function render(){
+  paintTabs(); paintRibbon();
+  $('body').innerHTML = tab==="home" ? homeScreen() : callsScreen();
+}
+
+function homeScreen(){
+  return `<div class="panel">
+    <div class="panel-h"><b>חודש שכר 04/2026 — רשימת עובדים</b>
+      <div class="sp"><button class="btn">חיפוש עובד</button><button class="btn or">חישוב שכר</button></div></div>
+    <div class="empty">מסך הבית הקיים של מערכת השכר.<br>
+      הפרוטוטייפ מדגים את רכיב קריאות השירות — ראו קבוצת "לישכה" בריבון, וטאב "שרות".</div>
+  </div>`;
+}
+
+function callsScreen(){
+  const list = scopeList();
+  const owners = [...new Set(calls.map(c=>c.owner).filter(Boolean))];
+  const ch = chips();
+  return `<div class="panel">
+    <div class="panel-h"><b>קריאות שירות — ${screen==='mine'?'הקריאות שלי':screen==='all'?'קריאות הארגון':'תמונת מצב'}</b>
+      <div class="sp"><button class="btn or" onclick="openNew()">+ קריאה חדשה</button></div></div>
+    ${screen==='dash'?'':`
+    <div class="filters">
+      <input class="q" id="q" placeholder="חיפוש לפי מספר קריאה, נושא או מודול"
+        value="${f.q}" oninput="onSearch(this.value)">
+      <select onchange="f.site=this.value;savedView=null;refreshList()">
+        <option value="">כל האתרים</option>
+        ${SITES.map(x=>`<option ${f.site===x?'selected':''}>${x}</option>`).join('')}</select>
+      <select onchange="f.st=this.value;savedView=null;refreshList()">
+        <option value="">כל המצבים</option>
+        ${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${f.st===k?'selected':''}>${v.t}</option>`).join('')}</select>
+      ${screen==='all'?`<select onchange="f.urg=this.value;savedView=null;refreshList()">
+        <option value="">כל הדחיפויות</option>
+        ${Object.entries(URG).map(([k,v])=>`<option value="${k}" ${f.urg===k?'selected':''}>${v}</option>`).join('')}</select>
+      <select onchange="f.owner=this.value;savedView=null;refreshList()">
+        <option value="">כל התומכים</option>
+        ${owners.map(o=>`<option ${f.owner===o?'selected':''}>${o}</option>`).join('')}</select>`:''}
+      <select onchange="f.sla=this.value;savedView=null;refreshList()">
+        <option value="">זמן תגובה — הכל</option>
+        <option value="over" ${f.sla==='over'?'selected':''}>חורגות בלבד</option></select>
+    </div>
+    <div id="chipZone">${chipBar(list)}</div>`}
+    <div id="listZone">${screen==='dash'?dash():tableHtml(list)}</div>
+  </div>`;
+}
+
+function chipBar(list){
+  const ch = chips();
+  return `<div class="chips">
+    ${ch.map(([k,t])=>`<button class="chip" onclick="clearF('${k}')">${t} ✕</button>`).join('')}
+    ${ch.length?`<button class="chip" style="background:#EDF1F6;border-color:var(--line2);color:#22364C" onclick="resetF()">ניקוי הכל ✕</button>`:''}
+    <span class="saved">תצוגות שמורות:
+      <button class="${savedView==='over'?'on':''}" onclick="applySaved('over')">חורגות מזמן תגובה</button>
+      ${screen==='all'?`<button class="${savedView==='urgent'?'on':''}" onclick="applySaved('urgent')">פתוחות דחופות</button>`:''}</span>
+    <span class="num">${list.length} ${list.length===1?'קריאה':'קריאות'}</span>
+  </div>`;
+}
+function refreshList(){
+  const list = scopeList();
+  const cz=$('chipZone'), lz=$('listZone');
+  if(cz) cz.innerHTML = chipBar(list);
+  if(lz) lz.innerHTML = tableHtml(list);
+  paintRibbon();
+}
+let sTimer;
+function onSearch(v){
+  f.q=v; savedView=null;
+  clearTimeout(sTimer); sTimer=setTimeout(refreshList,150);
+}
+
+function tableHtml(list){
+  if(!list.length) return `<div class="empty">לא נמצאו קריאות בסינון הנוכחי.<br>
+    <button class="btn" style="margin-top:8px" onclick="resetF()">ניקוי הסינון</button></div>`;
+  const all = screen==='all';
+  return `<table><thead><tr>
+    <th>מספר</th><th>נושא</th><th>אתר</th><th>מודול</th>${all?'<th>פותח</th><th>תומך</th>':''}
+    <th>נפתחה</th>${all?'<th>דחיפות</th>':''}<th>זמן תגובה</th><th>מצב</th></tr></thead><tbody>
+    ${list.map(c=>`<tr class="row ${c.unread?'unread':''}" onclick="openCall('${c.id}')">
+      <td><span class="id">${c.id}</span></td>
+      <td><b>${c.subj}</b></td>
+      <td>${c.site}</td>
+      <td>${c.mod}</td>
+      ${all?`<td>${c.by}</td><td>${c.owner||'<span class="u3">לא שויך</span>'}</td>`:''}
+      <td style="direction:ltr;text-align:right">${c.opened}</td>
+      ${all?`<td class="u${c.urg}">${URG[c.urg]}</td>`:''}
+      <td class="${c.left<0&&c.st!=='done'?'over':''}">${
+        c.st==='done'?'—':c.left<0?`חריגה ${-c.left} שעות`:`נותרו ${c.left} שעות`}</td>
+      <td style="white-space:nowrap"><span class="tag ${ST[c.st].c}">${ST[c.st].t}</span></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function dash(){
+  const n = s => calls.filter(c=>c.st===s).length;
+  const over = calls.filter(c=>c.left<0 && c.st!=='done').length;
+  const bySite={}; calls.filter(c=>c.st!=='done').forEach(c=>{ bySite[c.site]=(bySite[c.site]||0)+1; });
+  const bySubj={}; calls.forEach(c=>{ bySubj[c.subj]=(bySubj[c.subj]||0)+1; });
+  const msite=Math.max(...Object.values(bySite),1), ms=Math.max(...Object.values(bySubj),1);
+  const t=calls.length;
+  const a=n('open')/t*100, b2=a+n('work')/t*100, c2=b2+n('wait')/t*100;
+  return `<div style="padding:12px">
+    <div class="charts">
+      <div class="panel"><div class="panel-h"><b>פילוח קריאות</b></div>
+        <div class="donut">
+          <span class="ring" style="background:conic-gradient(var(--or) 0 ${a}%, var(--bar2) ${a}% ${b2}%, #D8B93A ${b2}% ${c2}%, var(--ok) ${c2}% 100%)"></span>
+          <span class="lg">
+            <button class="chip" style="display:block;width:100%;text-align:right;margin-bottom:3px" onclick="goFilter({st:'open'})"><i style="background:var(--or)"></i>פתוחות ${n('open')}</button>
+            <button class="chip" style="display:block;width:100%;text-align:right;margin-bottom:3px;background:var(--info-lt);border-color:#B9CDE6;color:var(--bar1)" onclick="goFilter({st:'work'})"><i style="background:var(--bar2)"></i>בטיפול ${n('work')}</button>
+            <button class="chip" style="display:block;width:100%;text-align:right;margin-bottom:3px;background:var(--amber-lt);border-color:#E6D5A4;color:var(--amber)" onclick="goFilter({st:'wait'})"><i style="background:#D8B93A"></i>ממתינות ${n('wait')}</button>
+            <button class="chip" style="display:block;width:100%;text-align:right;background:var(--ok-lt);border-color:#BFE0CD;color:var(--ok)" onclick="goFilter({st:'done'})"><i style="background:var(--ok)"></i>נסגרו ${n('done')}</button>
+          </span></div>
+        <div style="padding:0 12px 12px">
+          <button class="btn" style="width:100%;background:${over?'var(--red-lt)':'#EDF1F6'};border-color:${over?'#E0B4B4':'var(--line)'};color:${over?'var(--red)':'#22364C'};font-weight:600"
+            onclick="goFilter({sla:'over'})">${over} קריאות חורגות מזמן התגובה</button></div>
+      </div>
+      <div class="panel"><div class="panel-h"><b>קריאות פתוחות לפי אתר</b></div>
+        <div class="bars">${Object.entries(bySite).map(([k,v])=>`
+          <div class="bar"><em>${k}</em>
+            <span class="tr"><span class="fi" style="width:${v/msite*100}%"></span></span>
+            <b>${v}</b></div>`).join('')}</div></div>
+    </div>
+    <div class="panel"><div class="panel-h"><b>קריאות לפי נושא</b>
+      <div class="sp"><button class="btn" onclick="exportXls()">ייצוא לאקסל</button></div></div>
+      <div class="bars">${Object.entries(bySubj).sort((x,y)=>y[1]-x[1]).map(([k,v])=>`
+        <div class="bar" style="grid-template-columns:210px 1fr 30px"><em>${k}</em>
+          <span class="tr"><span class="fi" style="width:${v/ms*100}%"></span></span>
+          <b>${v}</b></div>`).join('')}</div></div>
+  </div>`;
+}
+
+function exportXls(){
+  const list = screen==='dash' ? calls : scopeList();
+  const bits=[];
+  if(f.st) bits.push(ST[f.st].t);
+  if(f.sla) bits.push("חורגות");
+  toast(`יוצאו ${list.length} קריאות · ${["קריאות-שכר",...bits,"07-09-2026"].join("-")}.xlsx`);
+}
+
+function openNew(){
+  draft = {site: lastSite||"", subj:"", desc:"", file:null};
+  paintNew(); showModal();
+}
+function paintNew(){
+  const ok = draft.site && draft.subj && draft.desc.trim().length>4;
+  $('dlg').className="dlg";
+  $('dlg').innerHTML = `
+    <div class="dlg-h"><span>☏</span><span>פתיחת קריאת שירות</span>
+      <button class="x" onclick="closeAll()">✕</button></div>
+    <div class="dlg-b">
+      <div class="auto">
+        <div class="hd"><b>נקלט אוטומטית</b>
+          <button onclick="toast('שינוי ידני — להחלטה באפיון')">שינוי</button></div>
+        <dl>
+          <dt>ארגון</dt><dd>${ORG}</dd>
+          <dt>מערכת</dt><dd>שכר — Harmony Payroll</dd>
+          <dt>חודש שכר</dt><dd>04/2026</dd>
+          <dt>גרסה</dt><dd>1.0.4.1454</dd>
+          <dt>מודול</dt><dd id="modVal">נגזר מהנושא</dd>
+          <dt>פותח</dt><dd>${ME}</dd>
+        </dl></div>
+      <div class="fld"><label for="st">אתר <span class="req">*</span></label>
+        <select id="st" onchange="draft.site=this.value;syncNew()">
+          <option value="">בחרו אתר</option>
+          ${SITES.map(x=>`<option ${draft.site===x?'selected':''}>${x}</option>`).join('')}</select>
+        <span class="hint">הרשימה נמשכת ממערכת הקריאות ומסוננת להרשאות שלכם.</span></div>
+      <div class="fld"><label for="sj">נושא <span class="req">*</span></label>
+        <select id="sj" onchange="draft.subj=this.value;syncNew()">
+          <option value="">בחרו נושא</option>
+          ${SUBJECTS.map(x=>`<option ${draft.subj===x?'selected':''}>${x}</option>`).join('')}</select>
+        <span class="hint" id="urgHint">נושאי מערכת השכר. למערכת הנוכחות רשימה נפרדת.</span></div>
+      <div class="fld"><label for="ds">תיאור הפנייה <span class="req">*</span></label>
+        <textarea id="ds" placeholder="מה קרה, מתי, ומה ניסיתם עד עכשיו"
+          oninput="draft.desc=this.value;syncNew()">${draft.desc}</textarea></div>
+      <div class="fld"><label>צירוף קובץ או צילום מסך</label>
+        ${draft.file?`<div class="shot"><span class="th"></span>
+          <span class="t">${draft.file}<span>240KB · יישמר עם הקריאה ויהיה נגיש לתומך</span></span>
+          <button class="btn" onclick="keepDraft();draft.file=null;paintNew()">הסרה</button></div>`
+        :`<div class="file" onclick="keepDraft();draft.file='screenshot.png';paintNew()">בחרו קובץ או צילום מסך</div>`}</div>
+    </div>
+    <div class="dlg-f">
+      <button class="btn or" id="goBtn" ${ok?'':'disabled'} onclick="submitNew()">פתיחת הקריאה</button>
+      <button class="btn" onclick="closeAll()">ביטול</button>
+      <span id="goHint" style="color:var(--muted);font-size:11.5px;${ok?'display:none':''}">בחרו אתר ונושא, והוסיפו תיאור</span>
+    </div>`;
+}
+function keepDraft(){
+  const d=$('ds'), sj=$('sj'), st=$('st');
+  if(d) draft.desc=d.value;
+  if(sj) draft.subj=sj.value;
+  if(st) draft.site=st.value;
+}
+function syncNew(){
+  const ok = draft.site && draft.subj && draft.desc.trim().length>4;
+  const mv=$('modVal');
+  if(mv) mv.textContent = draft.subj ? (SUBJ_MOD[draft.subj]||"לא סווג") : "נגזר מהנושא";
+  const uh=$('urgHint');
+  if(uh){
+    const u = SUBJ_URG[draft.subj]||2;
+    uh.textContent = draft.subj
+      ? `דחיפות ${URG[u]} · זמן תגובה ${u===1?8:u===3?48:24} שעות, לפי הנושא`
+      : 'נושאי מערכת השכר. למערכת הנוכחות רשימה נפרדת.';
+  }
+  const b=$('goBtn'), h=$('goHint');
+  if(b) b.disabled = !ok;
+  if(h) h.style.display = ok?'none':'';
+}
+function submitNew(){
+  const id = "CAS"+(seq++);
+  const urg = SUBJ_URG[draft.subj]||2;
+  const sla = urg===1?8:urg===2?24:48;
+  lastSite = draft.site;
+  calls.unshift({id, subj:draft.subj, urg, st:"open", opened:"07/09/2026 14:05",
+    by:ME, owner:null, site:draft.site, mod:SUBJ_MOD[draft.subj]||"לא סווג", sla, left:sla,
+    msgs:[{w:ME,t:draft.desc}]});
+  $('dlg').innerHTML = `
+    <div class="dlg-h"><span>✓</span><span>הקריאה נפתחה</span>
+      <button class="x" onclick="closeAll()">✕</button></div>
+    <div class="dlg-b confirm"><div class="mk">✓</div>
+      <h3>הקריאה נפתחה</h3><p>הפנייה נקלטה במערכת התמיכה ותשויך לתומך.</p>
+      <div class="recap">
+        <div class="r"><span>מספר קריאה</span><b class="id">${id}</b></div>
+        <div class="r"><span>אתר</span><b>${draft.site}</b></div>
+        <div class="r"><span>נושא</span><b>${draft.subj}</b></div>
+        <div class="r"><span>מודול</span><b>${SUBJ_MOD[draft.subj]||"לא סווג"}</b></div>
+        <div class="r"><span>דחיפות</span><b>${URG[urg]} — נקבעה לפי הנושא</b></div>
+        <div class="r"><span>זמן תגובה לפי ההסכם</span><b>${sla} שעות</b></div>
+      </div></div>
+    <div class="dlg-f">
+      <button class="btn or" onclick="closeAll();tab='service';screen='mine';render()">מעבר לקריאות שלי</button>
+      <button class="btn" onclick="closeAll()">חזרה לעבודה</button>
+    </div>`;
+  render();
+}
+
+function openCall(id){
+  cur = calls.find(c=>c.id===id); cur.unread=false;
+  paintCall(); showModal(); render();
+}
+function paintCall(){
+  const c=cur, mine = c.by===ME, orgView = canSeeOrg && screen!=='mine';
+  $('dlg').className="dlg wide";
+  $('dlg').innerHTML = `
+    <div class="dlg-h"><span>☏</span><span>${c.subj}</span>
+      <span class="tag ${ST[c.st].c}" style="background:#fff">${ST[c.st].t}</span>
+      <button class="x" onclick="closeAll()">✕</button></div>
+    <div class="dlg-b det">
+      <dl>
+        <dt>מספר קריאה</dt><dd class="id">${c.id}</dd>
+        <dt>נפתחה</dt><dd style="direction:ltr;text-align:right">${c.opened} · ${c.by}</dd>
+        <dt>אתר</dt><dd>${c.site}</dd>
+        <dt>מודול</dt><dd>${c.mod}</dd>
+        <dt>דחיפות</dt><dd class="u${c.urg}">${URG[c.urg]}</dd>
+        <dt>תומך מטפל</dt><dd>${c.owner||'<span class="u3">לא שויך</span>'}</dd>
+        <dt>זמן תגובה</dt><dd class="${c.left<0&&c.st!=='done'?'over':''}">${
+          c.st==='done'?'הקריאה נסגרה':c.left<0?`חריגה של ${-c.left} שעות`:`נותרו ${c.left} מתוך ${c.sla} שעות`}</dd>
+      </dl>
+      <div class="thread">
+        ${c.msgs.map(m=>`<div class="msg ${m.w===ME?'me':''}">
+          <span class="av">${m.w.slice(0,2)}</span>
+          <span class="bd"><span class="who">${m.w}</span><span class="tx">${m.t}</span></span></div>`).join('')}
+        ${c.st==='done'?'':`<div class="reply">
+          <input id="rp" placeholder="הוספת הודעה לקריאה">
+          <button class="btn or" onclick="addMsg()">שליחה</button></div>`}
+      </div></div>
+    <div class="dlg-f">
+      ${(mine && c.st!=='done')?`<button class="btn or" onclick="setSt('${c.id}','done')">סגירת הקריאה</button>`:''}
+      <button class="btn" onclick="toast('ייצוא הקריאה ל-PDF')">ייצוא ל-PDF</button>
+      <button class="btn" onclick="closeAll()">סגירה</button>
+      ${(orgView && !mine)?`<span style="color:var(--muted);font-size:11.5px;margin-inline-start:auto">קריאה של ${c.by} · ניתן לעקוב ולהוסיף הודעה</span>`:''}
+    </div>`;
+}
+function addMsg(){
+  const v=$('rp').value.trim(); if(!v) return;
+  cur.msgs.push({w:ME,t:v});
+  if(cur.st==='wait') cur.st='work';
+  paintCall(); render();
+}
+function setSt(id,st){
+  const c=calls.find(x=>x.id===id); c.st=st;
+  cur=c; paintCall(); render(); toast("הקריאה נסגרה");
+}
+
+function showModal(){ $('scrim').classList.add('on'); $('modal').classList.add('on'); }
+function closeAll(){ $('scrim').classList.remove('on'); $('modal').classList.remove('on'); }
+let tt;
+function toast(m){
+  const el=$('toast'); el.textContent=m; el.classList.add('on');
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('on'),2200);
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAll(); });
+
+render();
+</script>
+</body>
+</html>
